@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéDex Pro by Belkis Aslani - Interaktive Pokémon Datenbank</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FFCB05;
+            --secondary: #FF0000;
+            --accent: #3B4CCA;
+            --background: #1a1a2e;
+            --surface: #252542;
+            --surface-light: #2d2d52;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0c0;
+            --glass-bg: rgba(37, 37, 66, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 203, 5, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(59, 76, 202, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 0, 0, 0.05) 0%, transparent 40%);
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(2%, 2%) rotate(1deg); }
+            66% { transform: translate(-1%, 1%) rotate(-1deg); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 50%, var(--secondary) 50%);
+            border-radius: 50%;
+            border: 3px solid var(--background);
+            position: relative;
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--background);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid white;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-cta {
+            background: linear-gradient(135deg, var(--primary), #ffd93d);
+            color: var(--background);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 203, 5, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 5% 4rem;
+            position: relative;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-badge::before {
+            content: '●';
+            color: var(--secondary);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, var(--primary), #ffd93d);
+            color: var(--background);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(255, 203, 5, 0.3);
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 60px rgba(255, 203, 5, 0.4);
+        }
+
+        /* Animated Pokéball */
+        .pokeball-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 3rem auto 0;
+        }
+
+        .pokeball {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            animation: float 3s ease-in-out infinite, shake 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes shake {
+            0%, 90%, 100% { transform: translateY(0) rotate(0deg); }
+            92% { transform: translateY(0) rotate(-5deg); }
+            94% { transform: translateY(0) rotate(5deg); }
+            96% { transform: translateY(0) rotate(-5deg); }
+            98% { transform: translateY(0) rotate(5deg); }
+        }
+
+        .pokeball-top {
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(135deg, #ff4444 0%, var(--secondary) 100%);
+            border-radius: 150px 150px 0 0;
+            border: 8px solid #333;
+            border-bottom: 4px solid #333;
+        }
+
+        .pokeball-bottom {
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            bottom: 0;
+            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+            border-radius: 0 0 150px 150px;
+            border: 8px solid #333;
+            border-top: 4px solid #333;
+        }
+
+        .pokeball-center {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: white;
+            border: 8px solid #333;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pokeball-button {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            border: 3px solid #333;
+            border-radius: 50%;
+            animation: buttonPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes buttonPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            50% { box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0); }
+        }
+
+        .pokeball-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 203, 5, 0.3) 0%, transparent 70%);
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* Live Counter Section */
+        .counter-section {
+            padding: 4rem 5%;
+            background: var(--surface);
+        }
+
+        .counter-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .counter-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .counter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .counter-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .counter-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .counter-label {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .counter-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #4ade80;
+            margin-top: 1rem;
+        }
+
+        .counter-status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: livePulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 5%;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .section-header h2 span {
+            color: var(--primary);
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .bento-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, 250px);
+            gap: 1.5rem;
+        }
+
+        .bento-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bento-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.03) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .bento-item:hover::before {
+            opacity: 1;
+        }
+
+        .bento-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 203, 5, 0.3);
+        }
+
+        .bento-item.large {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        .bento-item.wide {
+            grid-column: span 2;
+        }
+
+        .bento-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent), #5a6fd6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+        }
+
+        .bento-item h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .bento-item p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .bento-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .bento-stat {
+            text-align: center;
+        }
+
+        .bento-stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .bento-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Pokémon Cards Section */
+        .pokemon-section {
+            padding: 6rem 5%;
+            background: var(--surface);
+        }
+
+        .pokemon-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .pokemon-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 203, 5, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .pokemon-card:hover::before {
+            opacity: 1;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .pokemon-image {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pokemon-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+            transition: transform 0.3s;
+        }
+
+        .pokemon-card:hover .pokemon-image img {
+            transform: scale(1.1);
+        }
+
+        .pokemon-number {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .pokemon-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            text-transform: capitalize;
+        }
+
+        .pokemon-types {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pokemon-type {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .type-grass { background: #78c850; color: white; }
+        .type-fire { background: #f08030; color: white; }
+        .type-water { background: #6890f0; color: white; }
+        .type-electric { background: #f8d030; color: #333; }
+        .type-psychic { background: #f85888; color: white; }
+        .type-ice { background: #98d8d8; color: #333; }
+        .type-dragon { background: #7038f8; color: white; }
+        .type-dark { background: #705848; color: white; }
+        .type-fairy { background: #ee99ac; color: #333; }
+        .type-normal { background: #a8a878; color: white; }
+        .type-fighting { background: #c03028; color: white; }
+        .type-flying { background: #a890f0; color: white; }
+        .type-poison { background: #a040a0; color: white; }
+        .type-ground { background: #e0c068; color: #333; }
+        .type-rock { background: #b8a038; color: white; }
+        .type-bug { background: #a8b820; color: white; }
+        .type-ghost { background: #705898; color: white; }
+        .type-steel { background: #b8b8d0; color: #333; }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            grid-column: 1 / -1;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--surface-light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 6rem 5%;
+        }
+
+        .steps {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .step:hover {
+            transform: translateX(10px);
+            border-color: rgba(255, 203, 5, 0.3);
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), #ffd93d);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--background);
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 6rem 5%;
+            background: var(--surface);
+        }
+
+        .testimonial-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .testimonial-stars {
+            color: var(--primary);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-text {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .testimonial-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #5a6fd6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+        }
+
+        .testimonial-info h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .testimonial-info p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: 6rem 5%;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .faq-question {
+            width: 100%;
+            padding: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.3s;
+        }
+
+        .faq-question:hover {
+            color: var(--primary);
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-question::after {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+        }
+
+        .faq-answer p {
+            padding: 0 1.5rem 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Final CTA */
+        .final-cta {
+            padding: 6rem 5%;
+            background: linear-gradient(135deg, var(--accent) 0%, #2a3a9c 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .final-cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .final-cta h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .final-cta p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .final-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--primary);
+            color: var(--background);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .final-cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 5% 2rem;
+            background: var(--background);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand {
+            grid-column: span 2;
+        }
+
+        .footer-brand .logo {
+            margin-bottom: 1rem;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
+            max-width: 300px;
+        }
+
+        .footer-links h4 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-social a {
+            width: 40px;
+            height: 40px;
+            background: var(--surface);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .footer-social a:hover {
+            background: var(--primary);
+            color: var(--background);
+            transform: translateY(-3px);
+        }
+
+        /* Scroll Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .bento-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: auto;
+            }
+            .bento-item.large {
+                grid-column: span 2;
+                grid-row: span 1;
+            }
+            .bento-item.wide {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .pokeball-container {
+                width: 200px;
+                height: 200px;
+            }
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+            .bento-item.large,
+            .bento-item.wide {
+                grid-column: span 1;
+            }
+            .step {
+                flex-direction: column;
+                text-align: center;
+            }
+            .footer-brand {
+                grid-column: span 1;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            <div class="logo-icon"></div>
+            PokéDex Pro
+        </div>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pokemon">Pokémon</a></li>
+            <li><a href="#how-it-works">So funktioniert's</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ul>
+        <a href="#discover" class="nav-cta">Jetzt entdecken</a>
+        <button class="mobile-menu-btn">☰</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="discover">
+        <div class="hero-content">
+            <div class="hero-badge">● Live API-Daten</div>
+            <h1>Entdecke die Welt der Pokémon</h1>
+            <p>PokéDex Pro bietet dir Zugang zu über 1.000 Pokémon mit Echtzeit-Daten direkt aus der offiziellen Pokémon API. Dein ultimativer Begleiter für alle Abenteuer!</p>
+            <a href="#pokemon" class="hero-cta">
+                Jetzt entdecken
+                <span>→</span>
+            </a>
+            
+            <!-- Animated Pokéball -->
+            <div class="pokeball-container">
+                <div class="pokeball-glow"></div>
+                <div class="pokeball">
+                    <div class="pokeball-top"></div>
+                    <div class="pokeball-bottom"></div>
+                    <div class="pokeball-center">
+                        <div class="pokeball-button"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Counter Section -->
+    <section class="counter-section">
+        <div class="counter-container">
+            <div class="counter-card reveal">
+                <div class="counter-icon">🎮</div>
+                <div class="counter-value" id="pokemon-count">0</div>
+                <div class="counter-label">Pokémon verfügbar</div>
+                <div class="counter-status">Live API</div>
+            </div>
+            <div class="counter-card reveal">
+                <div class="counter-icon">⚡</div>
+                <div class="counter-value" id="type-count">18</div>
+                <div class="counter-label">Verschiedene Typen</div>
+                <div class="counter-status">Aktiv</div>
+            </div>
+            <div class="counter-card reveal">
+                <div class="counter-icon">🏆</div>
+                <div class="counter-value" id="generation-count">9</div>
+                <div class="counter-label">Generationen</div>
+                <div class="counter-status">Vollständig</div>
+            </div>
+            <div class="counter-card reveal">
+                <div class="counter-icon">🌍</div>
+                <div class="counter-value" id="region-count">9</div>
+                <div class="counter-label">Regionen</div>
+                <div class="counter-status">Erforscht</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-header reveal">
+            <h2>Warum <span>PokéDex Pro?</span></h2>
+            <p>Die modernste Pokémon-Datenbank mit allen Features, die du brauchst, um ein wahrer Pokémon-Meister zu werden.</p>
+        </div>
+        <div class="bento-grid">
+            <div class="bento-item large reveal">
+                <div>
+                    <div class="bento-icon">🔍</div>
+                    <h3>Umfassende Suche</h3>
+                    <p>Finde jedes Pokémon in Sekundenschnelle. Suche nach Name, Typ, Generation oder Fähigkeiten. Unsere intelligente Suchfunktion macht es dir leicht.</p>
+                </div>
+                <div class="bento-stats">
+                    <div class="bento-stat">
+                        <div class="bento-stat-value">&lt;1s</div>
+                        <div class="bento-stat-label">Suchzeit</div>
+                    </div>
+                    <div class="bento-stat">
+                        <div class="bento-stat-value">100%</div>
+                        <div class="bento-stat-label">Abdeckung</div>
+                    </div>
+                    <div class="bento-stat">
+                        <div class="bento-stat-value">24/7</div>
+                        <div class="bento-stat-label">Verfügbar</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bento-item reveal">
+                <div class="bento-icon">📊</div>
+                <h3>Detailstatistiken</h3>
+                <p>HP, Angriff, Verteidigung, Spezialangriff und mehr auf einen Blick.</p>
+            </div>
+            <div class="bento-item reveal">
+                <div class="bento-icon">🎯</div>
+                <h3>Typen-Effektivität</h3>
+                <p>Sehe sofort, welche Typen stark oder schwach gegen ein Pokémon sind.</p>
+            </div>
+            <div class="bento-item wide reveal">
+                <div class="bento-icon">🔄</div>
+                <h3>Echtzeit-Updates</h3>
+                <p>Alle Daten werden direkt von der offiziellen Pokémon API bezogen. Du hast immer Zugriff auf die aktuellsten Informationen über alle Pokémon.</p>
+            </div>
+            <div class="bento-item reveal">
+                <div class="bento-icon">📱</div>
+                <h3>Responsive Design</h3>
+                <p>Optimiert für alle Geräte – Desktop, Tablet und Smartphone.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pokémon Cards Section -->
+    <section class="pokemon-section" id="pokemon">
+        <div class="section-header reveal">
+            <h2>Beliebte <span>Pokémon</span></h2>
+            <p>Live-Daten direkt aus der Pokémon API. Entdecke die beliebtesten Pokémon aller Zeiten.</p>
+        </div>
+        <div class="pokemon-grid" id="pokemon-grid">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="section-header reveal">
+            <h2>So <span>funktioniert's</span></h2>
+            <p>In drei einfachen Schritten zu deinem perfekten Pokémon-Guide.</p>
+        </div>
+        <div class="steps">
+            <div class="step reveal">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>API-Verbindung herstellen</h3>
+                    <p>Unsere Anwendung verbindet sich in Echtzeit mit der offiziellen Pokémon API, um dir stets aktuelle Daten zu liefern.</p>
+                </div>
+            </div>
+            <div class="step reveal">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Daten abrufen</h3>
+                    <p>Wir holen detaillierte Informationen zu jedem Pokémon – von Basis-Stats bis zu Typen-Effektivitäten.</p>
+                </div>
+            </div>
+            <div class="step reveal">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Entdecke & Lerne</h3>
+                    <p>Erkunde die Pokémon-Welt mit einer intuitiven Oberfläche, die alle wichtigen Informationen übersichtlich darstellt.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="section-header reveal">
+            <h2>Das sagen unsere <span>Trainer</span></h2>
+            <p>Was die Community über PokéDex Pro denkt.</p>
+        </div>
+        <div class="testimonial-grid">
+            <div class="testimonial-card reveal">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"PokéDex Pro hat mein Pokémon-Erlebnis komplett verändert. Die API-Integration ist nahtlos und die Daten sind immer aktuell. Ein Muss für jeden ernsthaften Trainer!"</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">AS</div>
+                    <div class="testimonial-info">
+                        <h4>Ash S.</h4>
+                        <p>Pokémon-Meister</p>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card reveal">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"Endlich eine Pokémon-Datenbank, die auch auf dem Handy perfekt funktioniert. Das Design ist atemberaubend und die Ladezeiten sind minimal."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">MO</div>
+                    <div class="testimonial-info">
+                        <h4>Misty O.</h4>
+                        <p>Wasser-Pokémon Expertin</p>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card reveal">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"Die Detailtiefe ist beeindruckend. Von EVs bis zu Movesets – alles ist vorhanden. Belkis Aslani hat hier wirklich Großartiges geleistet!"</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">BO</div>
+                    <div class="testimonial-info">
+                        <h4>Prof. Eich</h4>
+                        <p>Pokémon-Forscher</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="section-header reveal">
+            <h2>Häufig gestellte <span>Fragen</span></h2>
+            <p>Alles, was du über PokéDex Pro wissen musst.</p>
+        </div>
+        <div class="faq-container">
+            <div class="faq-item reveal">
+                <button class="faq-question">Ist PokéDex Pro kostenlos?</button>
+                <div class="faq-answer">
+                    <p>Ja, PokéDex Pro ist komplett kostenlos nutzbar. Wir glauben, dass jeder Zugang zu umfassenden Pokémon-Informationen haben sollte.</p>
+                </div>
+            </div>
+            <div class="faq-item reveal">
+                <button class="faq-question">Woher kommen die Daten?</button>
+                <div class="faq-answer">
+                    <p>Alle Daten werden in Echtzeit von der offiziellen PokéAPI (pokeapi.co) bezogen. Dies garantiert höchste Genauigkeit und Aktualität.</p>
+                </div>
+            </div>
+            <div class="faq-item reveal">
+                <button class="faq-question">Wie oft werden die Daten aktualisiert?</button>
+                <div class="faq-answer">
+                    <p>Da wir direkt auf die API zugreifen, sind die Daten immer auf dem neuesten Stand. Neue Pokémon werden automatisch hinzugefügt.</p>
+                </div>
+            </div>
+            <div class="faq-item reveal">
+                <button class="faq-question">Funktioniert PokéDex Pro auf dem Handy?</button>
+                <div class="faq-answer">
+                    <p>Absolut! PokéDex Pro ist vollständig responsive und funktioniert auf allen Geräten – von Desktop bis Smartphone.</p>
+                </div>
+            </div>
+            <div class="faq-item reveal">
+                <button class="faq-question">Wer hat PokéDex Pro entwickelt?</button>
+                <div class="faq-answer">
+                    <p>PokéDex Pro wurde von Belkis Aslani entwickelt – mit Leidenschaft für Pokémon und moderner Webtechnologie.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <div class="final-cta-content reveal">
+            <h2>Bereit für dein Abenteuer?</h2>
+            <p>Starte jetzt und entdecke die faszinierende Welt der Pokémon mit PokéDex Pro.</p>
+            <a href="#pokemon" class="final-cta-btn">Jetzt entdecken →</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    PokéDex Pro
+                </div>
+                <p>Die moderne Pokémon-Datenbank mit Echtzeit-API-Integration. Entwickelt von Belkis Aslani für Trainer weltweit.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Produkt</h4>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#pokemon">Pokémon</a></li>
+                    <li><a href="#how-it-works">So funktioniert's</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Ressourcen</h4>
+                <ul>
+                    <li><a href="https://pokeapi.co/" target="_blank">PokéAPI</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#">Dokumentation</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Rechtliches</h4>
+                <ul>
+                    <li><a href="#">Impressum</a></li>
+                    <li><a href="#">Datenschutz</a></li>
+                    <li><a href="#">AGB</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 PokéDex Pro by Belkis Aslani. Alle Rechte vorbehalten.</p>
+            <div class="footer-social">
+                <a href="#" aria-label="Twitter">𝕏</a>
+                <a href="#" aria-label="GitHub">⌘</a>
+                <a href="#" aria-label="Discord">💬</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Pokémon API Integration
+        const API_URL = 'https://pokeapi.co/api/v2/pokemon';
+        
+        // Fetch Pokémon count
+        async function fetchPokemonCount() {
+            try {
+                const response = await fetch(`${API_URL}?limit=1`);
+                const data = await response.json();
+                const count = data.count;
+                
+                // Animate counter
+                animateCounter('pokemon-count', count);
+            } catch (error) {
+                console.error('Error fetching Pokémon count:', error);
+                document.getElementById('pokemon-count').textContent = '1000+';
+            }
+        }
+
+        // Counter animation
+        function animateCounter(elementId, target) {
+            const element = document.getElementById(elementId);
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 16);
+        }
+
+        // Fetch and display Pokémon cards
+        async function fetchPokemonCards() {
+            const grid = document.getElementById('pokemon-grid');
+            const popularPokemon = [1, 4, 7, 25, 94, 133, 150, 196, 197, 448, 571, 658];
+            
+            try {
+                const pokemonPromises = popularPokemon.map(id => 
+                    fetch(`${API_URL}/${id}`).then(res => res.json())
+                );
+                
+                const pokemonData = await Promise.all(pokemonPromises);
+                
+                grid.innerHTML = pokemonData.map(pokemon => `
+                    <div class="pokemon-card reveal">
+                        <div class="pokemon-image">
+                            <img src="${pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default}" 
+                                 alt="${pokemon.name}" 
+                                 loading="lazy">
+                        </div>
+                        <div class="pokemon-number">#${String(pokemon.id).padStart(3, '0')}</div>
+                        <div class="pokemon-name">${pokemon.name}</div>
+                        <div class="pokemon-types">
+                            ${pokemon.types.map(type => `
+                                <span class="pokemon-type type-${type.type.name}">${type.type.name}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Re-initialize reveal animations for new elements
+                initRevealAnimations();
+            } catch (error) {
+                console.error('Error fetching Pokémon:', error);
+                grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Fehler beim Laden der Pokémon. Bitte versuche es später erneut.</p>';
+            }
+        }
+
+        // Intersection Observer for reveal animations
+        function initRevealAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // FAQ Accordion
+        function initFAQ() {
+            document.querySelectorAll('.faq-question').forEach(button => {
+                button.addEventListener('click', () => {
+                    const item = button.parentElement;
+                    const isActive = item.classList.contains('active');
+                    
+                    // Close all items
+                    document.querySelectorAll('.faq-item').forEach(faq => {
+                        faq.classList.remove('active');
+                    });
+                    
+                    // Open clicked item if it wasn't active
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        // Smooth scroll for anchor links
+        function initSmoothScroll() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchPokemonCount();
+            fetchPokemonCards();
+            initRevealAnimations();
+            initFAQ();
+            initSmoothScroll();
+        });
+
+        // Navbar scroll effect
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 100) {
+                nav.style.background = 'rgba(26, 26, 46, 0.95)';
+            } else {
+                nav.style.background = 'rgba(26, 26, 26, 0.8)';
+            }
+            
+            lastScroll = currentScroll;
+        });
+    </script>
+</body>
+</html>
