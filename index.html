@@ -212,7 +212,7 @@
         .book-inside {
             width: 100%;
             height: 100%;
-            padding: 10px;
+            padding: 15px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -971,7 +971,7 @@
                 }
             });
             
-            // Search
+            // Suchen
             document.getElementById('searchBox').addEventListener('input', (e) => {
                 // Real-time search
                 applyFilters();
@@ -1020,13 +1020,13 @@
             const searchTerm = document.getElementById('searchBox').value.toLowerCase();
             
             filteredPokemon = allPokemon.filter(pokemon => {
-                const matchesSearch = pokemon.name.toLowerCase().includes(searchTerm) ||
+                const matchesSuchen = pokemon.name.toLowerCase().includes(searchTerm) ||
                                     String(pokemon.id).includes(searchTerm);
                 
                 const matchesType = selectedTypes.size === 0 ||
                                    pokemon.types.some(t => selectedTypes.has(t.type.name));
                 
-                return matchesSearch && matchesType;
+                return matchesSuchen && matchesType;
             });
             
             renderPokemon();
