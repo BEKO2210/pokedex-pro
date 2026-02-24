@@ -1090,5 +1090,32 @@
         // Start
         init();
     </script>
+    
+    <!-- Background Music - Hidden, Autoplay, Loop -->
+    <audio id="bgMusic" loop style="display: none;">
+        <source src="https://github.com/BEKO2210/pokedex-pro/raw/main/audio/Song.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+        // Autoplay music after user interaction (browser policy)
+        let musicStarted = false;
+        function startMusic() {
+            if (!musicStarted) {
+                const audio = document.getElementById('bgMusic');
+                audio.volume = 0.3;
+                audio.play().catch(e => console.log('Audio autoplay blocked:', e));
+                musicStarted = true;
+            }
+        }
+        // Start on first click anywhere
+        document.addEventListener('click', startMusic, { once: true });
+        // Or try immediately (may be blocked)
+        window.addEventListener('load', () => {
+            const audio = document.getElementById('bgMusic');
+            audio.volume = 0.3;
+            audio.play().catch(() => {
+                // Will start on first click
+            });
+        });
+    </script>
 </body>
 </html>
