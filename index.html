@@ -1111,24 +1111,16 @@
         <source src="https://github.com/BEKO2210/pokedex-pro/raw/main/audio/Song.mp3" type="audio/mpeg">
     </audio>
     <script>
-        // Autoplay music after user interaction (browser policy)
+        // Music starts when clicking on a Pokémon card and loops continuously
         let musicStarted = false;
-        function startMusic() {
-            if (!musicStarted) {
+        document.addEventListener('click', function(e) {
+            if (!musicStarted && e.target.closest('.pokemon-book')) {
                 const audio = document.getElementById('bgMusic');
                 audio.volume = 0.3;
                 audio.play().catch(e => console.log('Audio autoplay blocked:', e));
                 musicStarted = true;
-                // Remove all listeners once music started
-                document.removeEventListener('click', startMusic);
-                document.removeEventListener('keydown', startMusic);
-                document.removeEventListener('touchstart', startMusic);
             }
-        }
-        // Start on first user interaction (click, keypress, or touch)
-        document.addEventListener('click', startMusic);
-        document.addEventListener('keydown', startMusic);
-        document.addEventListener('touchstart', startMusic);
+        });
     </script>
 </body>
 </html>
